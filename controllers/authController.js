@@ -139,7 +139,7 @@ exports.registerUser = async (req, res) => {
         }
 
         // ✅ Generate verification URL
-        const verificationUrl = `${process.env.BASE_URL}/verify-email/${user.verificationToken}`;
+        const verificationUrl = `${process.env.BASE_URL}/auth/verify-email/${user.verificationToken}`;
 
         // ✅ Send verification email with the full URL
         try {
