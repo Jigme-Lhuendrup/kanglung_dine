@@ -143,7 +143,7 @@ exports.registerUser = async (req, res) => {
 
         // ✅ Send verification email with the full URL
         try {
-            await sendVerificationEmail(user.email, verificationUrl);
+            await sendVerificationEmail(user.email, user.verificationToken);
         } catch (emailError) {
             await transaction.rollback();
             console.error('Failed to send verification email:', emailError);
