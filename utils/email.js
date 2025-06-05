@@ -22,7 +22,7 @@ const sendVerificationEmail = async (to, token) => {
     subject: 'Verify Your Email Address for Kanglung-Dine',
     html: `
       <p>Please verify your email address by clicking the link below:</p>
-      <p><a href="${verificationUrl}">${verificationUrl}</a></p>
+      <p><a href="${verificationUrl}">Click here to verify your email</a></p>
       <p>If you did not request this, please ignore this email.</p>
     `,
   };
