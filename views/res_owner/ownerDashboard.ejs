@@ -11,9 +11,13 @@
 </head>
 
 <body>
+  <button class="mobile-menu-btn" id="mobileMenuBtn">
+    <i data-feather="menu"></i>
+  </button>
+
   <div class="container">
     <!-- Sidebar -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
       <div class="user">
         <img src="<%= user.profilePicture || 'https://i.ibb.co/k6rDzmC/profile.png' %>" alt="profile" id="profileImage" />
         <h3><%= user.name %></h3>
@@ -112,21 +116,33 @@
               <h3>Add New Menu Item</h3>
             </div>
             <div class="card-body">
-              <form id="addMenuItemForm">
+              <form action="/res_owner/add-menu-item" method="POST" enctype="multipart/form-data">
                 <div class="form-row">
                   <div class="form-group">
-                    <label for="itemNo">Item No.</label>
-                    <input type="number" id="itemNo" name="itemNo" required min="1" class="form-control">
+                    <label for="name">Item Name</label>
+                    <input type="text" id="name" name="name" class="form-control" required>
                   </div>
                   <div class="form-group">
-                    <label for="itemName">Item Name</label>
-                    <input type="text" id="itemName" name="itemName" required class="form-control">
+                    <label for="price">Price</label>
+                    <input type="number" id="price" name="price" class="form-control" step="0.01" required>
                   </div>
                   <div class="form-group">
-                    <label for="price">Price (Nu.)</label>
-                    <input type="number" id="price" name="price" required min="0" step="0.01" class="form-control">
+                    <label for="category">Category</label>
+                    <select id="category" name="category" class="form-control" required>
+                      <option value="">Select Category</option>
+                      <option value="appetizers">Appetizers</option>
+                      <option value="main">Main Course</option>
+                      <option value="desserts">Desserts</option>
+                      <option value="beverages">Beverages</option>
+                    </select>
                   </div>
-                  <button type="submit" class="btn-add">Add Item</button>
+                  <div class="form-group">
+                    <label for="image">Image</label>
+                    <input type="file" id="image" name="image" class="form-control" accept="image/*" required>
+                  </div>
+                  <div class="form-group">
+                    <button type="submit" class="btn-add">Add Item</button>
+                  </div>
                 </div>
               </form>
             </div>
@@ -141,23 +157,27 @@
               <table class="menu-table">
                 <thead>
                   <tr>
-                    <th>Item No.</th>
-                    <th>Item Name</th>
-                    <th>Price (Nu.)</th>
-                    <th>Restaurant</th>
+                    <th>Image</th>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>Category</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
-                <tbody id="menuItemsTable">
+                <tbody>
                   <% menuItems.forEach(item => { %>
-                    <tr data-id="<%= item.id %>">
-                      <td><%= item.itemNo %></td>
-                      <td><%= item.itemName %></td>
-                      <td><%= Number(item.price).toFixed(2) %></td>
-                      <td><%= item.Restaurant.name %></td>
+                    <tr>
+                      <td><img src="<%= item.image %>" alt="<%= item.name %>" style="width: 50px; height: 50px; object-fit: cover;"></td>
+                      <td><%= item.name %></td>
+                      <td>Nu. <%= item.price.toFixed(2) %></td>
+                      <td><%= item.category %></td>
                       <td>
-                        <button class="btn-edit edit-item"><i data-feather="edit"></i></button>
-                        <button class="btn-delete delete-item"><i data-feather="trash-2"></i></button>
+                        <button class="btn-edit" onclick="editMenuItem('<%= item.id %>')">
+                          <i data-feather="edit-2"></i>
+                        </button>
+                        <button class="btn-delete" onclick="deleteMenuItem('<%= item.id %>')">
+                          <i data-feather="trash-2"></i>
+                        </button>
                       </td>
                     </tr>
                   <% }); %>
@@ -417,206 +437,65 @@
     // Initialize Feather icons
     feather.replace();
 
+    // Mobile menu functionality
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const sidebar = document.getElementById('sidebar');
+    const main = document.querySelector('main');
+
+    mobileMenuBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('active');
+    });
+
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', (e) => {
+      if (window.innerWidth <= 768) {
+        if (!sidebar.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+          sidebar.classList.remove('active');
+        }
+      }
+    });
+
     // Page switching functionality
     const menuItems = document.querySelectorAll('.menu-item');
     const pages = document.querySelectorAll('.page');
 
     menuItems.forEach(item => {
       item.addEventListener('click', () => {
-        // Update menu items
+        // Remove active class from all menu items and pages
         menuItems.forEach(i => i.classList.remove('active'));
+        pages.forEach(p => p.classList.remove('active'));
+
+        // Add active class to clicked menu item
         item.classList.add('active');
 
         // Show corresponding page
-        const pageId = item.dataset.page;
-        pages.forEach(page => {
-          page.classList.remove('active');
-          if (page.id === pageId) {
-            page.classList.add('active');
-          }
-        });
-      });
-    });
+        const pageId = item.getAttribute('data-page');
+        document.getElementById(pageId).classList.add('active');
 
-    // Profile picture upload handling
-    const profilePictureInput = document.getElementById('profilePictureInput');
-    const profilePictureForm = document.getElementById('profilePictureForm');
-    const profileImage = document.getElementById('profileImage');
-    const settingsProfileImage = document.getElementById('settingsProfileImage');
-
-    profilePictureInput.addEventListener('change', (e) => {
-      if (e.target.files && e.target.files[0]) {
-        const formData = new FormData(profilePictureForm);
-        
-        fetch('/res_owner/update-profile-picture', {
-          method: 'POST',
-          body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            // Update both profile pictures
-            profileImage.src = data.profilePicture;
-            settingsProfileImage.src = data.profilePicture;
-          } else {
-            alert('Failed to update profile picture');
-          }
-        })
-        .catch(error => {
-          console.error('Error:', error);
-          alert('Error updating profile picture');
-        });
-      }
-    });
-
-    document.addEventListener('DOMContentLoaded', function() {
-      // Menu Management JavaScript
-      const restaurantId = '<%= restaurant.id %>';
-      const addMenuItemForm = document.getElementById('addMenuItemForm');
-      const menuItemsTable = document.getElementById('menuItemsTable');
-
-      // Add Menu Item
-      addMenuItemForm?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const formData = {
-          itemNo: document.getElementById('itemNo').value,
-          itemName: document.getElementById('itemName').value,
-          price: document.getElementById('price').value,
-          res_name: '<%= restaurant.name %>'
-        };
-
-        try {
-          const response = await fetch('/res_owner/menu', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
-          });
-
-          if (response.ok) {
-            const menuItem = await response.json();
-            
-            // Create new row
-            const newRow = document.createElement('tr');
-            newRow.dataset.id = menuItem.id;
-            newRow.innerHTML = `
-              <td>${menuItem.itemNo}</td>
-              <td>${menuItem.itemName}</td>
-              <td>${Number(menuItem.price).toFixed(2)}</td>
-              <td>${menuItem.res_name}</td>
-              <td>
-                <button class="btn-edit edit-item"><i data-feather="edit"></i></button>
-                <button class="btn-delete delete-item"><i data-feather="trash-2"></i></button>
-              </td>
-            `;
-
-            // Add event listeners to new buttons
-            const editBtn = newRow.querySelector('.edit-item');
-            const deleteBtn = newRow.querySelector('.delete-item');
-            
-            addEditListener(editBtn);
-            addDeleteListener(deleteBtn);
-
-            // Add the new row to the table
-            menuItemsTable.appendChild(newRow);
-
-            // Clear the form
-            addMenuItemForm.reset();
-
-            // Re-initialize feather icons for the new buttons
-            feather.replace();
-          } else {
-            const error = await response.json();
-            alert(error.message || 'Error adding menu item');
-          }
-        } catch (error) {
-          console.error('Error:', error);
-          alert('Error adding menu item');
+        // Close sidebar on mobile after selection
+        if (window.innerWidth <= 768) {
+          sidebar.classList.remove('active');
         }
       });
-
-      // Function to add edit listener to a button
-      function addEditListener(button) {
-        button.addEventListener('click', async (e) => {
-          const row = e.target.closest('tr');
-          const id = row.dataset.id;
-          const itemNo = row.cells[0].textContent;
-          const itemName = row.cells[1].textContent;
-          const price = row.cells[2].textContent;
-
-          const newItemNo = prompt('Enter new item number:', itemNo);
-          const newItemName = prompt('Enter new item name:', itemName);
-          const newPrice = prompt('Enter new price:', price);
-
-          if (newItemNo && newItemName && newPrice) {
-            try {
-              const response = await fetch(`/res_owner/menu/${id}`, {
-                method: 'PUT',
-                headers: {
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                  itemNo: newItemNo,
-                  itemName: newItemName,
-                  price: newPrice,
-                  res_name: '<%= restaurant.name %>'
-                })
-              });
-
-              if (response.ok) {
-                const updatedItem = await response.json();
-                row.cells[0].textContent = updatedItem.itemNo;
-                row.cells[1].textContent = updatedItem.itemName;
-                row.cells[2].textContent = Number(updatedItem.price).toFixed(2);
-                row.cells[3].textContent = updatedItem.res_name;
-              } else {
-                const error = await response.json();
-                alert(error.message || 'Error updating menu item');
-              }
-            } catch (error) {
-              console.error('Error:', error);
-              alert('Error updating menu item');
-            }
-          }
-        });
-      }
-
-      // Function to add delete listener to a button
-      function addDeleteListener(button) {
-        button.addEventListener('click', async (e) => {
-          if (confirm('Are you sure you want to delete this menu item?')) {
-            const row = e.target.closest('tr');
-            const id = row.dataset.id;
-
-            try {
-              const response = await fetch(`/res_owner/menu/${id}`, {
-                method: 'DELETE'
-              });
-
-              if (response.ok) {
-                row.remove();
-              } else {
-                const error = await response.json();
-                alert(error.message || 'Error deleting menu item');
-              }
-            } catch (error) {
-              console.error('Error:', error);
-              alert('Error deleting menu item');
-            }
-          }
-        });
-      }
-
-      // Add event listeners to existing edit and delete buttons
-      document.querySelectorAll('.edit-item').forEach(button => {
-        addEditListener(button);
-      });
-
-      document.querySelectorAll('.delete-item').forEach(button => {
-        addDeleteListener(button);
-      });
     });
+
+    // Handle profile picture change
+    document.getElementById('profilePictureInput').addEventListener('change', function() {
+      document.getElementById('profilePictureForm').submit();
+    });
+
+    // Handle menu item actions
+    function editMenuItem(id) {
+      // Implement edit functionality
+      console.log('Edit item:', id);
+    }
+
+    function deleteMenuItem(id) {
+      if (confirm('Are you sure you want to delete this menu item?')) {
+        // Implement delete functionality
+        console.log('Delete item:', id);
+      }
+    }
   </script>
 </body>
 </html>
