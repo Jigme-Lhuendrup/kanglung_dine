@@ -14,9 +14,8 @@ exports.registerUser = async (req, res) => {
     let transaction;
     
     try {
-        // Start transaction
         transaction = await sequelize.transaction();
-        
+
         console.log('Registration attempt with data:', {
             name: req.body.name,
             email: req.body.email,
@@ -25,7 +24,6 @@ exports.registerUser = async (req, res) => {
 
         const { name, email, password, role, restaurantName, restaurantAddress, restaurantPhone, restaurantHours } = req.body;
 
-        // Input validation
         if (!name || !email || !password || !role) {
             console.log('Missing required fields:', { name: !!name, email: !!email, password: !!password, role: !!role });
             return res.render('signup', { 
@@ -36,7 +34,6 @@ exports.registerUser = async (req, res) => {
             });
         }
 
-        // Additional validation for restaurant owners
         if (role === 'owner' && (!restaurantName || !restaurantAddress || !restaurantPhone || !restaurantHours)) {
             return res.render('signup', {
                 error: 'All restaurant fields are required for restaurant owners',
@@ -50,7 +47,6 @@ exports.registerUser = async (req, res) => {
             });
         }
 
-        // Validate role
         if (!['user', 'owner', 'admin'].includes(role)) {
             console.log('Invalid role:', role);
             return res.render('signup', { 
@@ -59,8 +55,7 @@ exports.registerUser = async (req, res) => {
                 email
             });
         }
-        
-        // Prevent registration with admin email
+
         if (email === ADMIN_EMAIL) {
             return res.render('signup', { 
                 error: 'This email cannot be used for registration',
@@ -68,7 +63,6 @@ exports.registerUser = async (req, res) => {
             });
         }
 
-        // Check if user already exists
         const existingUser = await User.findOne({ 
             where: { email },
             transaction
@@ -83,7 +77,6 @@ exports.registerUser = async (req, res) => {
             });
         }
 
-        // Check if restaurant name already exists for restaurant owners
         if (role === 'owner') {
             const existingRestaurant = await Restaurant.findOne({
                 where: { name: restaurantName },
@@ -107,7 +100,6 @@ exports.registerUser = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         const verificationToken = crypto.randomBytes(32).toString('hex');
         
-        // Create new user
         const user = await User.create({
             name,
             email,
@@ -116,7 +108,6 @@ exports.registerUser = async (req, res) => {
             verificationToken
         }, { transaction });
 
-        // If user is a restaurant owner, create the restaurant
         if (role === 'owner') {
             try {
                 const restaurant = await Restaurant.create({
@@ -128,7 +119,6 @@ exports.registerUser = async (req, res) => {
                     description: `Welcome to ${restaurantName}, owned by ${name}.`
                 }, { transaction });
 
-                // Verify restaurant was created
                 if (!restaurant) {
                     throw new Error('Restaurant was not saved to database');
                 }
@@ -148,14 +138,13 @@ exports.registerUser = async (req, res) => {
             }
         }
 
-        // Commit transaction only after both user and restaurant (if applicable) are created
-        // Send verification email
+        // ✅ Generate verification URL
+        const verificationUrl = `${process.env.BASE_URL}/verify-email/${user.verificationToken}`;
+
+        // ✅ Send verification email with the full URL
         try {
-            await sendVerificationEmail(user.email, user.verificationToken);
+            await sendVerificationEmail(user.email, verificationUrl);
         } catch (emailError) {
-            // If email sending fails, we should still rollback the transaction
-            // or decide if the user should be created without verification email sent.
-            // For now, let's rollback and show an error.
             await transaction.rollback();
             console.error('Failed to send verification email:', emailError);
             return res.render('signup', {
@@ -169,19 +158,17 @@ exports.registerUser = async (req, res) => {
                 restaurantHours: req.body.restaurantHours
             });
         }
-        
+
         await transaction.commit();
-        
+
         console.log('User registered successfully, verification email sent:', {
             id: user.id,
             email: user.email,
             role: user.role
         });
 
-        // Redirect to login page with success message
         return res.redirect('/auth/login?success=Registration successful! Please check your email to verify your account.');
     } catch (err) {
-        // Rollback transaction on error
         if (transaction) await transaction.rollback();
         console.error('Registration error:', err);
         return res.render('signup', { 
@@ -206,23 +193,20 @@ exports.loginUser = async (req, res) => {
 
         const { email, password } = req.body;
 
-        // Check for admin credentials
         if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
             let adminUser = await User.findOne({ where: { email: ADMIN_EMAIL } });
 
             if (!adminUser) {
-                // Admin user does not exist, create it
                 const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 10);
                 adminUser = await User.create({
                     name: 'Administrator',
                     email: ADMIN_EMAIL,
                     password: hashedPassword,
                     role: 'admin',
-                    isVerified: true // Admins are verified by default
+                    isVerified: true
                 });
                 console.log('Admin user created in database:', adminUser.toJSON());
             } else {
-                // Admin user exists, ensure role is 'admin' and isVerified is true
                 if (adminUser.role !== 'admin' || !adminUser.isVerified) {
                     adminUser.role = 'admin';
                     adminUser.isVerified = true;
@@ -231,9 +215,9 @@ exports.loginUser = async (req, res) => {
                 }
             }
 
-            req.session.isAdmin = true; // Retain for specific admin checks if needed elsewhere
+            req.session.isAdmin = true;
             req.session.user = {
-                id: adminUser.id, // Use ID from database
+                id: adminUser.id,
                 name: adminUser.name,
                 email: adminUser.email,
                 role: adminUser.role
@@ -242,7 +226,6 @@ exports.loginUser = async (req, res) => {
             return res.redirect('/admin/dashboard');
         }
 
-        // Regular user authentication
         const user = await User.findOne({ 
             where: { email },
             attributes: ['id', 'name', 'email', 'password', 'role', 'isVerified']
@@ -264,7 +247,6 @@ exports.loginUser = async (req, res) => {
             return res.render('login', { error: 'Invalid email or password' });
         }
 
-        // Set user session
         req.session.user = { 
             id: user.id, 
             name: user.name, 
@@ -279,7 +261,6 @@ exports.loginUser = async (req, res) => {
             role: user.role
         });
 
-        // Redirect based on role
         if (user.role === 'owner') {
             console.log('Redirecting to owner dashboard');
             return res.redirect('/res_owner/dashboard');
@@ -318,19 +299,12 @@ exports.verifyEmail = async (req, res) => {
         }
 
         user.isVerified = true;
-        user.verificationToken = null; // Clear the token after verification
+        user.verificationToken = null;
         await user.save();
 
-        // Optionally, redirect to login with a success message or show a success page
-        // For now, let's send a simple success message.
-        // It's better to redirect to a page that says "Email verified, you can now login"
-        // and then redirect to login page.
-        // res.send('Email verified successfully! You can now login.');
         return res.redirect('/auth/login?success=Email verified successfully! You can now login.');
-
     } catch (err) {
         console.error('Email verification error:', err);
-        // It's good practice to have an error page or a more user-friendly error message
         return res.status(500).send('Error verifying email: ' + err.message);
     }
 };
