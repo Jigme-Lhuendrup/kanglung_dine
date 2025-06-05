@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kanglung Dine</title>
+  <link rel="stylesheet" href="/css/styles.css"/>
+  <link rel="stylesheet" href="/css/header.css"/>
+  <link rel="stylesheet" href="/css/footer.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body>
+  <!-- ===== NAVBAR ===== -->
+  <%- include('components/header') %>
+
+  <!-- ===== HERO SECTION ===== -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <h1>Discover the Best Eateries in Kanglung</h1>
+      <p>Browse, locate, and reserve your favorite spots to eat with ease.</p>
+      <form class="search-bar" action="/search" method="GET">
+        <input type="text" name="q" placeholder="Search restaurants..." required />
+        <button type="submit">Search</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ===== CATEGORIES / FEATURED ===== -->
+<section class="categories">
+    <h2>Top Categories</h2>
+    <div class="category-grid">
+      <div class="category-card">
+        <img src="https://th.bing.com/th/id/OIP.ujsMXfsctykenHPtlmUYiQHaEK?w=250&h=180&c=7&r=0&o=5&pid=1.7" alt="Cafés" class="category-img" />
+        <div>Cafés</div>
+      </div>
+      <div class="category-card">
+        <img src="https://th.bing.com/th/id/OIP.TOIKvxylk601phktsEXgLAHaEU?w=296&h=180&c=7&r=0&o=5&pid=1.7" alt="Restaurants" class="category-img" />
+        <div>Restaurants</div>
+      </div>
+      <div class="category-card">
+        <img src="https://th.bing.com/th/id/OIP.lRc4os3fson9Alq66FTZSAHaFc?w=226&h=180&c=7&r=0&o=5&pid=1.7" alt="Fast Food" class="category-img" />
+        <div>Bar</div>
+      </div>
+      <div class="category-card">
+        <img src="https://th.bing.com/th/id/OIP.Udnr9WHfF_ZA4w_BYVhLwAHaLG?w=115&h=180&c=7&r=0&o=5&pid=1.7" alt="Bakery" class="category-img" />
+        <div>Bakery</div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== VISUAL FEST ===== -->
+<section class="visual-fest">
+    <div class="visual-container">
+      <div class="visual-images">
+        <img src="/images/home_VF1.jpeg" alt="Bhutanese dumplings">
+        <img src="/images/home_VF2.jpeg" alt="Bhutanese Food">
+        <img src="/images/home_VF3.jpeg" alt="Bhutanese Food">
+        <img src="/images/home_VF4.jpeg" alt="Bhutanese Food">
+        <img src="/images/home_VF5.jpeg" alt="Bhutanese Food">
+        <img src="/images/home_VF6.jpeg" alt="Bhutanese Food">
+        <img src="/images/home_VF7.jpeg" alt="Bhutanese Food">
+        <img src="/images/home_VF8.jpeg" alt="Bhutanese Food">
+      </div>
+      <div class="visual-text">
+        <h2>Visual Fest</h2>
+        <p><strong>Take a Glimpse of the mouthwatering creations<br> from Kanglung, Trashigang</strong></p>
+      </div>
+    </div>
+  </section>
+  
+
+  <!-- ===== FOOTER ===== -->
+  <%- include('components/footer') %>
+
+  <script src="/js/script.js"></script>
+</body>
+</html>

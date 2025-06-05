@@ -1,0 +1,97 @@
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+    <div class="footer-content">
+        <div class="footer-section">
+            <img src="/images/logo_blue.png" alt="logo">
+            <h3>Easy Navigate:</h3>
+            <ul>
+                <li><a href="/home">Home</a></li>
+                <li><a href="/restaurants">Restaurants</a></li>
+                <li><a href="/reservations">Reservations</a></li>
+                <li><a href="/labout">About</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <div class="contact-form">
+                <h3>Contact Form</h3>
+                <form id="footerContactForm">
+                    <input type="text" id="footerName" name="name" placeholder="Full Name" required>
+                    <input type="email" id="footerEmail" name="email" placeholder="Email" required>
+                    <textarea id="footerMessage" name="message" placeholder="Message" required></textarea>
+                    <input type="hidden" id="footerRating" name="rating" value="">
+                    <div class="terms-checkbox">
+                        <input type="checkbox" id="terms" required>
+                        <label for="terms">I accept the <a href="/terms">Terms & Conditions</a></label>
+                    </div>
+                    <button type="submit">Submit</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="footer-section">
+            <div class="contact-info">
+                <h3>Address:</h3>
+                <p>Kanglung, Trashigang</p>
+                
+                <h3>Contact:</h3>
+                <p>+975-17468810</p>
+                
+                <h3>Email:</h3>
+                <p>kanglungdine123@gmail.com</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="social-section">
+        <h3>FOLLOW US on:</h3>
+        <div class="social-icons">
+            <a href="#" aria-label="TikTok"><i class="bi bi-tiktok"></i></a>
+            <a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
+            <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+            <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <p>© 2025 KanglungDine</p>
+    </div>
+</footer>
+
+<script>
+document.getElementById('footerContactForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = {
+        name: document.getElementById('footerName').value,
+        email: document.getElementById('footerEmail').value,
+        message: document.getElementById('footerMessage').value,
+        rating: document.getElementById('footerRating').value
+    };
+
+    try {
+        const response = await fetch('/testimonials/submit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            alert('Thank you for your feedback!');
+            document.getElementById('footerContactForm').reset();
+            document.getElementById('terms').checked = false;
+            // Reload testimonials if we're on the contact page
+            if (typeof loadTestimonials === 'function') {
+                loadTestimonials();
+            }
+        } else {
+            alert('Failed to submit feedback. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error submitting feedback:', error);
+        alert('An error occurred. Please try again later.');
+    }
+});
+</script>

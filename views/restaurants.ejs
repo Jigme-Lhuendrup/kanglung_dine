@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Make a Reservation | Kanglung Dine</title>
+  <link rel="stylesheet" href="/css/styles.css"/>
+  <link rel="stylesheet" href="/css/header.css"/>
+  <link rel="stylesheet" href="/css/footer.css"/>
+  <link rel="stylesheet" href="/css/restaurants.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    .restaurant {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .restaurant-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      justify-content: center;
+    }
+
+    .no-menu {
+      color: #666;
+      font-style: italic;
+      font-size: 0.9em;
+    }
+
+    .btn {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn:hover {
+      background-color: #218838;
+    }
+
+    .no-restaurants {
+      text-align: center;
+      padding: 40px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      grid-column: 1 / -1;
+    }
+
+    .restaurant p {
+      color: #666;
+      margin: 10px 0;
+      font-size: 0.9em;
+    }
+
+    .restaurants-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 30px;
+      padding: 20px;
+    }
+
+    .restaurant h3 {
+      color: #333;
+      margin: 0 0 15px 0;
+    }
+  </style>
+</head>
+<body>
+    <!-- ===== NAVBAR ===== -->
+    <%- include('components/header') %>
+    <div class="container">
+      <h1>Restaurants Available</h1>
+      <div class="restaurants-grid">
+        <% if (restaurants && restaurants.length > 0) { %>
+          <% restaurants.forEach(restaurant => { %>
+            <div class="restaurant">
+              <h3><%= restaurant.name %></h3>
+              <p><%= restaurant.description || 'No description available' %></p>
+              <div class="restaurant-buttons">
+                <% if (restaurant.Menus && restaurant.Menus.length > 0) { %>
+                  <a href="/restaurants/<%= restaurant.id %>/menu" class="btn">View Menu</a>
+                <% } else { %>
+                  <span class="no-menu">No menu available</span>
+                <% } %>
+              </div>
+            </div>
+          <% }); %>
+        <% } else { %>
+          <div class="no-restaurants">
+            <p>No restaurants available at the moment.</p>
+          </div>
+        <% } %>
+      </div>
+    </div>
+    <!-- ===== FOOTER ===== -->
+    <%- include('components/footer') %>
+    <script src="/js/reservation.js"></script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+.terms-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.terms-container h1 {
+    color: #0f1653;
+    text-align: center;
+    font-size: 2.5em;
+    margin-bottom: 30px;
+    font-family: 'Georgia', serif;
+}
+
+.terms-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+}
+
+.terms-section h2 {
+    color: #ff6600;
+    font-size: 1.5em;
+    margin-bottom: 15px;
+    font-family: 'Georgia', serif;
+}
+
+.terms-section p {
+    color: #333;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+.terms-section ul {
+    list-style-type: none;
+    padding-left: 20px;
+}
+
+.terms-section ul li {
+    color: #333;
+    margin-bottom: 10px;
+    position: relative;
+    padding-left: 20px;
+}
+
+.terms-section ul li::before {
+    content: "•";
+    color: #ff6600;
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+}
+
+.terms-footer {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+    text-align: center;
+    color: #666;
+}
+
+.terms-footer a {
+    color: #ff6600;
+    text-decoration: none;
+}
+
+.terms-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+    .terms-container {
+        margin: 20px;
+        padding: 15px;
+    }
+
+    .terms-container h1 {
+        font-size: 2em;
+    }
+
+    .terms-section {
+        padding: 15px;
+    }
+
+    .terms-section h2 {
+        font-size: 1.3em;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .terms-container h1 {
+        font-size: 1.8em;
+    }
+
+    .terms-section {
+        padding: 10px;
+    }
+
+    .terms-section h2 {
+        font-size: 1.2em;
+    }
+}

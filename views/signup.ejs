@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sign Up | Kanglung Dine</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <style>
+    .role-select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+    .role-select:focus {
+      outline: none;
+      border-color: #4CAF50;
+    }
+    .error-message {
+      color: #ff0000;
+      background-color: #ffe6e6;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 4px;
+      text-align: center;
+    }
+    .restaurant-fields {
+      display: none;
+    }
+    .restaurant-fields.show {
+      display: block;
+    }
+    .form-section {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .form-section h3 {
+      margin-top: 0;
+      margin-bottom: 15px;
+      color: #333;
+    }
+  </style>
+</head>
+
+<body>
+    <!-- ===== NAVBAR ===== -->
+    <%- include('partials/header') %>
+
+  <div class="auth-container">
+    <h2>Create Your Account</h2>
+    <% if (locals.error) { %>
+      <div class="error-message">
+        <%= error %>
+      </div>
+    <% } %>
+    <form action="/auth/signup" method="POST" class="auth-form" id="signupForm">
+      <div class="form-section">
+        <h3>Personal Information</h3>
+        <input type="text" name="name" id="name" placeholder="Full Name" required 
+               value="<%= locals.name || '' %>" />
+        <input type="email" name="email" id="email" placeholder="Email" required 
+               value="<%= locals.email || '' %>" />
+        <input type="password" name="password" id="password" placeholder="Password" required />
+        <select name="role" id="role" class="role-select" required>
+          <option value="">Select Role</option>
+          <option value="user" <%= locals.role === 'user' ? 'selected' : '' %>>Customer</option>
+          <option value="owner" <%= locals.role === 'owner' ? 'selected' : '' %>>Restaurant Owner</option>
+        </select>
+      </div>
+
+      <div id="restaurantFields" class="restaurant-fields form-section">
+        <h3>Restaurant Information</h3>
+        <input type="text" name="restaurantName" id="restaurantName" 
+               placeholder="Restaurant Name" 
+               value="<%= locals.restaurantName || '' %>" />
+        <input type="text" name="restaurantAddress" id="restaurantAddress" 
+               placeholder="Restaurant Address" 
+               value="<%= locals.restaurantAddress || '' %>" />
+        <input type="tel" name="restaurantPhone" id="restaurantPhone" 
+               placeholder="Restaurant Phone (e.g., +975 17123456)" 
+               value="<%= locals.restaurantPhone || '' %>" />
+        <input type="text" name="restaurantHours" id="restaurantHours" 
+               placeholder="Opening Hours (e.g., 9:00 AM - 9:00 PM)" 
+               value="<%= locals.restaurantHours || '' %>" />
+      </div>
+
+      <button type="submit">Sign Up</button>
+      <p>Already have an account? <a href="/auth/login">Login</a></p>
+    </form>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <%- include('partials/footer') %>
+
+  <script>
+    document.getElementById('role').addEventListener('change', function() {
+      const restaurantFields = document.getElementById('restaurantFields');
+      const inputs = restaurantFields.getElementsByTagName('input');
+      
+      if (this.value === 'owner') {
+        restaurantFields.classList.add('show');
+        for (let input of inputs) {
+          input.required = true;
+        }
+      } else {
+        restaurantFields.classList.remove('show');
+        for (let input of inputs) {
+          input.required = false;
+          input.value = '';
+        }
+      }
+    });
+
+    // Initialize restaurant fields visibility based on role
+    if (document.getElementById('role').value === 'owner') {
+      document.getElementById('restaurantFields').classList.add('show');
+      const inputs = document.getElementById('restaurantFields').getElementsByTagName('input');
+      for (let input of inputs) {
+        input.required = true;
+      }
+    }
+
+    document.getElementById('signupForm').addEventListener('submit', function(e) {
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const role = document.getElementById('role').value;
+
+      if (!name || !email || !password || !role) {
+        e.preventDefault();
+        alert('Please fill in all required fields');
+        return;
+      }
+
+      if (role === 'owner') {
+        const restaurantName = document.getElementById('restaurantName').value.trim();
+        const restaurantAddress = document.getElementById('restaurantAddress').value.trim();
+        const restaurantPhone = document.getElementById('restaurantPhone').value.trim();
+        const restaurantHours = document.getElementById('restaurantHours').value.trim();
+
+        if (!restaurantName || !restaurantAddress || !restaurantPhone || !restaurantHours) {
+          e.preventDefault();
+          alert('Please fill in all restaurant information');
+        }
+      }
+    });
+  </script>
+</body>
+</html>

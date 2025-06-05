@@ -1,0 +1,360 @@
+/* Header Styles */
+.main-header {
+    background-color: #01173B;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+.logo img {
+    height: 50px;
+    width: auto;
+}
+
+.main-nav {
+    flex: 1;
+    margin: 0 2rem;
+}
+
+.main-nav ul {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 2rem;
+    justify-content: flex-end;
+}
+
+.main-nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem;
+    position: relative;
+    text-align: right;
+}
+
+/* Mobile menu styles */
+@media screen and (max-width: 768px) {
+    .main-nav {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: #01173B;
+        padding: 1rem;
+        display: none;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .main-nav.active {
+        display: block;
+    }
+
+    .main-nav ul {
+        flex-direction: column;
+        align-items: flex-end;
+        text-align: right;
+    }
+
+    .main-nav a {
+        width: 100%;
+        text-align: right;
+        padding: 1rem;
+    }
+}
+
+.main-nav a::after {
+    content: "";
+    position: absolute;
+    width: 0%;
+    height: 2px;
+    left: 0;
+    bottom: 0;
+    background-color: #ff6600;
+    transition: width 0.3s ease;
+}
+
+.main-nav a:hover::after {
+    width: 50%;
+}
+
+.header-actions {
+    display: flex;
+    align-items: right;
+    gap: 1.5rem;
+}
+
+.search-icon i,
+.profile-icon i {
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+}
+
+.search-icon i:hover,
+.profile-icon i:hover {
+    opacity: 0.8;
+}
+
+
+/* Search Overlay Styles */
+.search-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(15, 22, 83, 0.95);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.search-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.header-search-form {
+    position: relative;
+    width: 80%;
+    max-width: 600px;
+    margin-top: 100px;
+    display: flex;
+    align-items: center;
+}
+
+.header-search-form form {
+    width: 100%;
+    display: flex;
+    gap: 10px;
+}
+
+.header-search-form input {
+    flex: 1;
+    padding: 15px 20px;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 30px;
+    background: white;
+    color: #333;
+}
+
+.header-search-form button {
+    background: #0f1653;
+    border: none;
+    padding: 0 20px;
+    border-radius: 30px;
+    color: white;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.header-search-form .close-search {
+    background: rgba(255,255,255,0.1);
+    color: white;
+}
+
+.header-search-form button:hover {
+    opacity: 0.9;
+}
+
+.header-search-form input:focus {
+    outline: none;
+    box-shadow: 0 0 10px rgba(255, 102, 0, 0.3);
+}
+
+.search-icon i,
+.profile-icon i {
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.search-icon i:hover,
+.profile-icon i:hover {
+    color: #000;
+}
+/* Add padding to body to account for fixed header */
+body {
+    padding-top: 80px;
+}
+
+
+/* Responsive Header Styles */
+@media screen and (max-width: 768px) {
+    .main-header {
+        padding: 0.5rem 1rem;
+    }
+
+    .logo img {
+        height: 40px;
+    }
+
+    .main-nav ul {
+        gap: 1rem;
+    }
+
+    .main-nav a {
+        font-size: 0.9rem;
+    }
+}
+
+@media screen and (max-width: 576px) {
+    .main-nav ul {
+        display: none;
+    }
+
+    .header-actions {
+        gap: 1rem;
+    }
+
+    .search-icon i,
+    .profile-icon i {
+        font-size: 20px;
+    }
+
+    .header-search-form {
+        width: 90%;
+        margin-top: 80px;
+    }
+}
+
+
+/* Logout Button Styles */
+.logout-button a {
+    color: white;
+    text-decoration: none;
+    font-size: 24px;
+    transition: color 0.3s ease;
+}
+
+.logout-button a:hover {
+    color: #ff6600;
+}
+
+/* Nav Toggle Button */
+.nav-toggle {
+    display: none;
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+}
+
+.nav-toggle i {
+    transition: color 0.3s ease;
+}
+
+.nav-toggle:hover i {
+    color: #ff6600;
+}
+
+/* Updated Responsive Styles */
+@media screen and (max-width: 768px) {
+    .main-header {
+        padding: 0.5rem 1rem;
+    }
+
+    .nav-toggle {
+        display: block;
+    }
+
+    .main-nav {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: #0f1653;
+        padding: 1rem;
+        display: none;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        margin: 0;
+    }
+
+    .main-nav.active {
+        display: block;
+    }
+
+    .main-nav ul {
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .main-nav a {
+        font-size: 1.2rem;
+        padding: 0.5rem 1rem;
+        width: 100%;
+        text-align: center;
+        display: block;
+    }
+
+    .header-actions {
+        gap: 1.2rem;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .main-header {
+        padding: 1rem;
+    }
+
+    .logo img {
+        height: 40px;
+    }
+
+    .search-icon i,
+    .profile-icon i,
+    .logout-button a {
+        font-size: 20px;
+    }
+}
+
+.profile-icon a {
+    color: white;
+    text-decoration: none;
+}
+
+.profile-icon a:hover {
+    color: #ff6600;
+}
+
+.profile-container {
+    max-width: 800px;
+    margin: 100px auto;
+    padding: 2rem;
+}
+
+.profile-info {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.profile-avatar i {
+    font-size: 5rem;
+    color: #0f1653;
+}
+
+.profile-details h2 {
+    margin-bottom: 1rem;
+    color: #0f1653;
+}

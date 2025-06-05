@@ -1,0 +1,90 @@
+h1, h2 {
+    text-align: center;
+    text-decoration: underline;
+}
+
+/* Mission and Vision Container */
+.mission-vision-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+    width: 90%;
+    max-width: 1200px;
+    margin: 2rem auto;
+}
+
+/* sections - headers and cards */
+.section-box {
+    background-color: orange;
+    color: white;
+    padding: 1rem;
+    border-radius: 10px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-bottom: 1px solid black;
+}
+
+.section-box h3 {
+    margin-top: 0;
+    font-size: 1.2rem;
+    text-decoration: underline;
+}
+
+.section-box img {
+    width: 100%;
+    max-width: 300px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+/* Responsive design for smaller screens */
+@media screen and (max-width: 768px) {
+    .mission-vision-container {
+        flex-direction: column;
+    }
+    
+    .section-box {
+        width: 100%;
+        margin: 1rem 0;
+    }
+}
+
+/*team section*/
+.team-section {
+    text-align: center;
+    margin: 2rem auto;
+}
+
+.team-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    margin: 1rem;
+}
+
+.team-member {
+    background-color: #fff;
+    color: black;
+    border-radius: 10px;
+    width: 150px;
+    padding: 1rem;
+}
+
+.team-member img {
+    width: 100%;
+    border-radius: 50%;
+}
+
+.team-member h4 {
+    margin: 0.5rem 0 0;
+}
+
+.team-member p {
+    margin: 0;
+    font-size: 0.8rem;
+}

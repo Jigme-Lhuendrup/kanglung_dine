@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login | Kanglung Dine</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body>
+    <!-- ===== NAVBAR ===== -->
+    <%- include('partials/header') %>
+  <div class="auth-container">
+    <% if (locals.successMessage) { %>
+        <div class="success-message">
+            <%= successMessage %>
+        </div>
+    <% } %>
+    <% if (locals.error) { %>
+        <div class="error-message">
+            <%= error %>
+        </div>
+    <% } %>
+    <h2>Login to Kanglung Dine</h2>
+    <form action="/auth/login" method="POST" class="auth-form" id="loginForm">
+      <input type="email" name="email" placeholder="Email" required />
+      <input type="password" name="password" placeholder="Password" required />
+      <button type="submit">Login</button>
+      <p>Don't have an account? <a href="/signup">Sign Up</a></p>
+    </form>
+  </div>
+
+  <script>
+    // Check for success message in URL query parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const successMessage = urlParams.get('success');
+    if (successMessage) {
+      alert(successMessage);
+      // Optional: Remove the query parameter from URL after displaying to prevent re-alerting on refresh
+      if (window.history.replaceState) {
+        const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+        window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+      }
+    }
+
+    // Add client-side form validation
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      const email = this.email.value.trim();
+      const password = this.password.value.trim();
+      
+      if (!email || !password) {
+        e.preventDefault();
+        alert('Please fill in all fields');
+      }
+    });
+  </script>
+</body>
+</html>

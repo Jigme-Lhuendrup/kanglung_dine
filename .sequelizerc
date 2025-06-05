@@ -1,0 +1,8 @@
+const path = require('path');
+
+module.exports = {
+  'config': path.resolve('Kanglung-Dine', 'config', 'config.js'),
+  'models-path': path.resolve('Kanglung-Dine', 'models'),
+  'migrations-path': path.resolve('Kanglung-Dine', 'migrations'),
+  'seeders-path': path.resolve('Kanglung-Dine', 'seeders') // Standard path, even if not used yet
+};

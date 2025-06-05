@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KanglungDine Admin</title>
+  <link rel="stylesheet" href="/css/owner-dashboard.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <script src="https://unpkg.com/feather-icons"></script>
+</head>
+
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="user">
+        <img src="<%= user.profilePicture || 'https://i.ibb.co/k6rDzmC/profile.png' %>" alt="profile" id="profileImage" />
+        <h3><%= user.name %></h3>
+        <p>Restaurant Owner</p>
+      </div>
+      <ul class="menu">
+        <li class="menu-item active" data-page="dashboard"><i data-feather="grid"></i> Dashboard</li>
+        <li class="menu-item" data-page="menu"><i data-feather="book-open"></i> Menu</li>
+        <li class="menu-item" data-page="settings"><i data-feather="settings"></i> User Settings</li>
+      </ul>
+    </aside>
+
+    <main>
+      <!-- Dashboard Page -->
+      <div class="page active" id="dashboard">
+        <section class="restaurant-info">
+          <h2><%= restaurant.name %></h2>
+          <p><strong>Address:</strong> <%= restaurant.address %></p>
+          <p><strong>Phone:</strong> <%= restaurant.phone %></p>
+          <p><strong>Hours:</strong> <%= restaurant.openingHours %></p>
+        </section>
+
+        <section class="status-box">
+          <div class="status">Reservations Status</div>
+          <div class="totals">
+            <p>Total Reservations: <%= reservations.length %></p>
+            <p style="color: #ffc107">Pending: <%= reservations.filter(r => r.status === 'pending').length %></p>
+            <p style="color: green">Confirmed: <%= reservations.filter(r => r.status === 'confirmed').length %></p>
+            <p style="color: red">Rejected: <%= reservations.filter(r => r.status === 'rejected').length %></p>
+          </div>
+        </section>
+
+        <section class="reservations">
+          <h2>TABLE RESERVATIONS</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Customer</th>
+                <th>Email</th>
+                <th>Guests</th>
+                <th>Status</th>
+                <th>Special Requests</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (reservations.length === 0) { %>
+                <tr>
+                  <td colspan="8" class="no-reservations">No reservations found</td>
+                </tr>
+              <% } else { %>
+                <% reservations.forEach(reservation => { %>
+                  <tr>
+                    <td><%= new Date(reservation.date).toLocaleDateString() %></td>
+                    <td><%= reservation.time %></td>
+                    <td><%= reservation.User.name %></td>
+                    <td><%= reservation.User.email %></td>
+                    <td><%= reservation.numberOfGuests %></td>
+                    <td>
+                      <span class="status-badge <%= reservation.status %>">
+                        <%= reservation.status.charAt(0).toUpperCase() + reservation.status.slice(1) %>
+                      </span>
+                    </td>
+                    <td><%= reservation.specialRequests || '-' %></td>
+                    <td>
+                      <% if (reservation.status === 'pending') { %>
+                        <div class="action-buttons">
+                          <form action="/reservations/<%= reservation.id %>/accept" method="POST" style="display: inline;">
+                            <button type="submit" class="btn-accept">Accept</button>
+                          </form>
+                          <form action="/reservations/<%= reservation.id %>/reject" method="POST" style="display: inline;">
+                            <button type="submit" class="btn-reject">Reject</button>
+                          </form>
+                        </div>
+                      <% } else { %>
+                        -
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }); %>
+              <% } %>
+            </tbody>
+          </table>
+        </section>
+      </div>
+
+      <!-- Menu Page -->
+      <div class="page" id="menu">
+        <h2>Menu Management</h2>
+        <div class="menu-content">
+          <!-- Add Menu Item Form -->
+          <div class="card">
+            <div class="card-header">
+              <h3>Add New Menu Item</h3>
+            </div>
+            <div class="card-body">
+              <form id="addMenuItemForm">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="itemNo">Item No.</label>
+                    <input type="number" id="itemNo" name="itemNo" required min="1" class="form-control">
+                  </div>
+                  <div class="form-group">
+                    <label for="itemName">Item Name</label>
+                    <input type="text" id="itemName" name="itemName" required class="form-control">
+                  </div>
+                  <div class="form-group">
+                    <label for="price">Price (Nu.)</label>
+                    <input type="number" id="price" name="price" required min="0" step="0.01" class="form-control">
+                  </div>
+                  <button type="submit" class="btn-add">Add Item</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Menu Items Table -->
+          <div class="card mt-4">
+            <div class="card-header">
+              <h3>Current Menu Items</h3>
+            </div>
+            <div class="card-body">
+              <table class="menu-table">
+                <thead>
+                  <tr>
+                    <th>Item No.</th>
+                    <th>Item Name</th>
+                    <th>Price (Nu.)</th>
+                    <th>Restaurant</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="menuItemsTable">
+                  <% menuItems.forEach(item => { %>
+                    <tr data-id="<%= item.id %>">
+                      <td><%= item.itemNo %></td>
+                      <td><%= item.itemName %></td>
+                      <td><%= Number(item.price).toFixed(2) %></td>
+                      <td><%= item.Restaurant.name %></td>
+                      <td>
+                        <button class="btn-edit edit-item"><i data-feather="edit"></i></button>
+                        <button class="btn-delete delete-item"><i data-feather="trash-2"></i></button>
+                      </td>
+                    </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings Page -->
+      <div class="page" id="settings">
+        <h2>User Settings</h2>
+        <div class="settings-container">
+          <!-- Profile Picture Section -->
+          <div class="profile-section">
+            <h3>Profile Picture</h3>
+            <div class="profile-picture-container">
+              <img src="<%= user.profilePicture || 'https://i.ibb.co/k6rDzmC/profile.png' %>" alt="profile" id="settingsProfileImage" />
+              <div class="profile-picture-overlay">
+                <label for="profilePictureInput" class="change-picture-btn">
+                  <i data-feather="camera"></i>
+                  Change Picture
+                </label>
+              </div>
+            </div>
+            <form id="profilePictureForm" action="/res_owner/update-profile-picture" method="POST" enctype="multipart/form-data">
+              <input type="file" id="profilePictureInput" name="profilePicture" accept="image/*" style="display: none;" />
+            </form>
+          </div>
+
+          <!-- User Information Section -->
+          <div class="user-info-section">
+            <h3>User Information</h3>
+            <div class="info-group">
+              <label>Name:</label>
+              <p><%= user.name %></p>
+            </div>
+            <div class="info-group">
+              <label>Email:</label>
+              <p><%= user.email %></p>
+            </div>
+            <div class="info-group">
+              <label>Role:</label>
+              <p>Restaurant Owner</p>
+            </div>
+          </div>
+
+          <!-- Actions Section -->
+          <div class="actions-section">
+            <a href="/res_owner/logout" class="btn-logout">
+              <i data-feather="log-out"></i>
+              Logout
+            </a>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <style>
+    .restaurant-info {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .restaurant-info h2 {
+      margin-top: 0;
+      color: #333;
+    }
+    .status-badge {
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.85em;
+      font-weight: 500;
+    }
+    .status-badge.pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+    .status-badge.confirmed {
+      background: #d4edda;
+      color: #155724;
+    }
+    .status-badge.rejected {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    .status-badge.cancelled {
+      background: #e2e3e5;
+      color: #383d41;
+    }
+    .action-buttons {
+      display: flex;
+      gap: 5px;
+    }
+    .btn-accept, .btn-reject {
+      padding: 4px 8px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85em;
+      color: white;
+    }
+    .btn-accept {
+      background-color: #28a745;
+    }
+    .btn-reject {
+      background-color: #dc3545;
+    }
+    .btn-accept:hover {
+      background-color: #218838;
+    }
+    .btn-reject:hover {
+      background-color: #c82333;
+    }
+    .no-reservations {
+      text-align: center;
+      color: #666;
+      padding: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #dee2e6;
+    }
+    th {
+      background-color: #f8f9fa;
+      font-weight: 600;
+    }
+    tbody tr:hover {
+      background-color: #f8f9fa;
+    }
+
+    /* Menu Management Styles */
+    .menu-content {
+      padding: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    .card-header {
+      padding: 15px 20px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .card-header h3 {
+      margin: 0;
+      color: #333;
+    }
+
+    .card-body {
+      padding: 20px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      align-items: end;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #555;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .btn-add {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .btn-add:hover {
+      background: #45a049;
+    }
+
+    .menu-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .menu-table th,
+    .menu-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+
+    .menu-table th {
+      background: #f8f9fa;
+      font-weight: 600;
+    }
+
+    .btn-edit,
+    .btn-delete {
+      padding: 6px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 5px;
+    }
+
+    .btn-edit {
+      background: #ffc107;
+      color: #000;
+    }
+
+    .btn-delete {
+      background: #dc3545;
+      color: white;
+    }
+
+    .btn-edit:hover {
+      background: #e0a800;
+    }
+
+    .btn-delete:hover {
+      background: #c82333;
+    }
+
+    .mt-4 {
+      margin-top: 1.5rem;
+    }
+  </style>
+
+  <script>
+    // Initialize Feather icons
+    feather.replace();
+
+    // Page switching functionality
+    const menuItems = document.querySelectorAll('.menu-item');
+    const pages = document.querySelectorAll('.page');
+
+    menuItems.forEach(item => {
+      item.addEventListener('click', () => {
+        // Update menu items
+        menuItems.forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+
+        // Show corresponding page
+        const pageId = item.dataset.page;
+        pages.forEach(page => {
+          page.classList.remove('active');
+          if (page.id === pageId) {
+            page.classList.add('active');
+          }
+        });
+      });
+    });
+
+    // Profile picture upload handling
+    const profilePictureInput = document.getElementById('profilePictureInput');
+    const profilePictureForm = document.getElementById('profilePictureForm');
+    const profileImage = document.getElementById('profileImage');
+    const settingsProfileImage = document.getElementById('settingsProfileImage');
+
+    profilePictureInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        const formData = new FormData(profilePictureForm);
+        
+        fetch('/res_owner/update-profile-picture', {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Update both profile pictures
+            profileImage.src = data.profilePicture;
+            settingsProfileImage.src = data.profilePicture;
+          } else {
+            alert('Failed to update profile picture');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Error updating profile picture');
+        });
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Menu Management JavaScript
+      const restaurantId = '<%= restaurant.id %>';
+      const addMenuItemForm = document.getElementById('addMenuItemForm');
+      const menuItemsTable = document.getElementById('menuItemsTable');
+
+      // Add Menu Item
+      addMenuItemForm?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = {
+          itemNo: document.getElementById('itemNo').value,
+          itemName: document.getElementById('itemName').value,
+          price: document.getElementById('price').value,
+          res_name: '<%= restaurant.name %>'
+        };
+
+        try {
+          const response = await fetch('/res_owner/menu', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+          });
+
+          if (response.ok) {
+            const menuItem = await response.json();
+            
+            // Create new row
+            const newRow = document.createElement('tr');
+            newRow.dataset.id = menuItem.id;
+            newRow.innerHTML = `
+              <td>${menuItem.itemNo}</td>
+              <td>${menuItem.itemName}</td>
+              <td>${Number(menuItem.price).toFixed(2)}</td>
+              <td>${menuItem.res_name}</td>
+              <td>
+                <button class="btn-edit edit-item"><i data-feather="edit"></i></button>
+                <button class="btn-delete delete-item"><i data-feather="trash-2"></i></button>
+              </td>
+            `;
+
+            // Add event listeners to new buttons
+            const editBtn = newRow.querySelector('.edit-item');
+            const deleteBtn = newRow.querySelector('.delete-item');
+            
+            addEditListener(editBtn);
+            addDeleteListener(deleteBtn);
+
+            // Add the new row to the table
+            menuItemsTable.appendChild(newRow);
+
+            // Clear the form
+            addMenuItemForm.reset();
+
+            // Re-initialize feather icons for the new buttons
+            feather.replace();
+          } else {
+            const error = await response.json();
+            alert(error.message || 'Error adding menu item');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Error adding menu item');
+        }
+      });
+
+      // Function to add edit listener to a button
+      function addEditListener(button) {
+        button.addEventListener('click', async (e) => {
+          const row = e.target.closest('tr');
+          const id = row.dataset.id;
+          const itemNo = row.cells[0].textContent;
+          const itemName = row.cells[1].textContent;
+          const price = row.cells[2].textContent;
+
+          const newItemNo = prompt('Enter new item number:', itemNo);
+          const newItemName = prompt('Enter new item name:', itemName);
+          const newPrice = prompt('Enter new price:', price);
+
+          if (newItemNo && newItemName && newPrice) {
+            try {
+              const response = await fetch(`/res_owner/menu/${id}`, {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  itemNo: newItemNo,
+                  itemName: newItemName,
+                  price: newPrice,
+                  res_name: '<%= restaurant.name %>'
+                })
+              });
+
+              if (response.ok) {
+                const updatedItem = await response.json();
+                row.cells[0].textContent = updatedItem.itemNo;
+                row.cells[1].textContent = updatedItem.itemName;
+                row.cells[2].textContent = Number(updatedItem.price).toFixed(2);
+                row.cells[3].textContent = updatedItem.res_name;
+              } else {
+                const error = await response.json();
+                alert(error.message || 'Error updating menu item');
+              }
+            } catch (error) {
+              console.error('Error:', error);
+              alert('Error updating menu item');
+            }
+          }
+        });
+      }
+
+      // Function to add delete listener to a button
+      function addDeleteListener(button) {
+        button.addEventListener('click', async (e) => {
+          if (confirm('Are you sure you want to delete this menu item?')) {
+            const row = e.target.closest('tr');
+            const id = row.dataset.id;
+
+            try {
+              const response = await fetch(`/res_owner/menu/${id}`, {
+                method: 'DELETE'
+              });
+
+              if (response.ok) {
+                row.remove();
+              } else {
+                const error = await response.json();
+                alert(error.message || 'Error deleting menu item');
+              }
+            } catch (error) {
+              console.error('Error:', error);
+              alert('Error deleting menu item');
+            }
+          }
+        });
+      }
+
+      // Add event listeners to existing edit and delete buttons
+      document.querySelectorAll('.edit-item').forEach(button => {
+        addEditListener(button);
+      });
+
+      document.querySelectorAll('.delete-item').forEach(button => {
+        addDeleteListener(button);
+      });
+    });
+  </script>
+</body>
+</html>

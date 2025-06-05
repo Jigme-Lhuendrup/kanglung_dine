@@ -1,0 +1,93 @@
+.restaurant-header {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    align-items: start;
+}
+
+.restaurant-image {
+    flex: 1;
+    max-width: 500px;
+}
+
+.restaurant-image img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.info-section {
+    flex: 1;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+}
+
+.info-section p {
+    margin: 0.5rem 0;
+    font-size: 1.1em;
+}
+
+.stars {
+    margin-top: 1rem;
+    font-size: 1.2em;
+}
+
+.menu-section {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin: 2rem 0;
+}
+
+.menu-category {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.menu-item {
+    display: flex;
+    justify-content: space-between;
+    margin: 0.5rem 0;
+}
+
+.reviews-section {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.review {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.button-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2rem;
+}
+
+.btn {
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1em;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.book-btn {
+    background-color: #ffd700;
+    color: #0f1653;
+}
+
+.back-btn {
+    background-color: #ff6600;
+    color: white;
+}

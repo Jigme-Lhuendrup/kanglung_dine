@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title><%= restaurant.name %> Menu | Kanglung Dine</title>
+    <link rel="stylesheet" href="/css/styles.css"/>
+    <link rel="stylesheet" href="/css/header.css"/>
+    <link rel="stylesheet" href="/css/footer.css"/>
+    <style>
+        .menu-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .restaurant-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .restaurant-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .restaurant-header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .restaurant-header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .menu-items {
+            list-style: none;
+            padding: 0;
+        }
+
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-details {
+            flex-grow: 1;
+        }
+
+        .item-name {
+            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .item-number {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .item-price {
+            font-weight: bold;
+            color: #28a745;
+            font-size: 1.1em;
+            margin-left: 20px;
+        }
+
+        .no-items {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .back-button {
+            display: inline-block;
+            margin: 20px;
+            padding: 10px 20px;
+            background-color: #ff7b00;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .back-button:hover {
+            background-color: #e66d00;
+        }
+
+        .restaurant-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .owner-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .owner-name {
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <!-- ===== NAVBAR ===== -->
+    <%- include('components/header') %>
+
+    <a href="/restaurants" class="back-button">← Back to Restaurants</a>
+
+    <div class="menu-container">
+        <div class="restaurant-header">
+            <% if (restaurant.image) { %>
+                <img src="<%= restaurant.image %>" alt="<%= restaurant.name %>" class="restaurant-image">
+            <% } %>
+            <h1><%= restaurant.name %></h1>
+            <div class="restaurant-info">
+                <img src="<%= restaurant.User?.profilePicture || '/images/default-profile.png' %>" alt="Owner" class="owner-avatar">
+                <span class="owner-name">Owner: <%= restaurant.User?.name || 'Anonymous' %></span>
+            </div>
+            <p><%= restaurant.description || 'Welcome to our restaurant' %></p>
+        </div>
+
+        <% if (restaurant.Menus && restaurant.Menus.length > 0) { %>
+            <ul class="menu-items">
+                <% restaurant.Menus.sort((a, b) => a.itemNo - b.itemNo).forEach(item => { %>
+                    <li class="menu-item">
+                        <div class="item-details">
+                            <div class="item-name"><%= item.itemName %></div>
+                            <div class="item-number">Item #<%= item.itemNo %></div>
+                        </div>
+                        <div class="item-price">Nu. <%= Number(item.price).toFixed(2) %></div>
+                    </li>
+                <% }); %>
+            </ul>
+        <% } else { %>
+            <div class="no-items">
+                <p>No menu items available at the moment.</p>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <%- include('components/footer') %>
+</body>
+</html> 

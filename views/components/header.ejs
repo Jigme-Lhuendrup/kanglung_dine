@@ -1,0 +1,65 @@
+<header class="main-header">
+    <div class="logo">
+        <a href="/">
+            <img src="/images/logo_blue.png" alt="KanglungDine Logo">
+        </a>
+    </div>
+    <nav class="main-nav" id="mainNav">
+        <ul>
+            <li><a href="/home">Home</a></li>
+            <li><a href="/lcontact">Contact Us</a></li>
+            <li><a href="/restaurants">Restaurants</a></li>
+            <li><a href="/reservations">Reservations</a></li>
+            <li><a href="/labout">About Us</a></li>
+        </ul>
+    </nav>
+    <div class="header-actions">
+        <div class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu">
+            <i class="bi bi-list"></i>
+        </div>
+        <div class="search-icon" id="searchToggle" aria-label="Open search">
+            <i class="bi bi-search"></i>
+        </div>
+        <div class="profile-icon" aria-label="User profile">
+            <a href="/profile"><i class="bi bi-person-circle"></i></a>
+        </div>
+        <div class="logout-button" aria-label="Logout">
+            <a href="/auth/logout"><i class="bi bi-box-arrow-right"></i></a>
+        </div>
+    </div>
+</header>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="searchOverlay">
+    <div class="header-search-form">
+        <form action="/search" method="GET">
+            <input type="text" placeholder="Search restaurants..." name="q">
+            <button type="submit"><i class="bi bi-search"></i></button>
+            <button type="button" id="closeSearch" class="close-search">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+document.getElementById('navToggle').addEventListener('click', function() {
+    document.getElementById('mainNav').classList.toggle('active');
+});
+
+document.getElementById('searchToggle').addEventListener('click', function() {
+    document.getElementById('searchOverlay').classList.add('active');
+    document.querySelector('.header-search-form input').focus();
+});
+
+document.getElementById('closeSearch').addEventListener('click', function() {
+    document.getElementById('searchOverlay').classList.remove('active');
+});
+
+// Close search overlay when clicking outside the search form
+document.getElementById('searchOverlay').addEventListener('click', function(e) {
+    if (e.target === this) {
+        this.classList.remove('active');
+    }
+});
+</script>
