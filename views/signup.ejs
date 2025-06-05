@@ -71,10 +71,11 @@
       <div class="form-section">
         <h3>Personal Information</h3>
         <input type="text" name="name" id="name" placeholder="Full Name" required 
-               value="<%= locals.name || '' %>" />
+               value="<%= locals.name || '' %>" autocomplete="name" />
         <input type="email" name="email" id="email" placeholder="Email" required 
-               value="<%= locals.email || '' %>" />
-        <input type="password" name="password" id="password" placeholder="Password" required />
+               value="<%= locals.email || '' %>" autocomplete="email" />
+        <input type="password" name="password" id="password" placeholder="Password" required 
+               autocomplete="new-password" />
         <select name="role" id="role" class="role-select" required>
           <option value="">Select Role</option>
           <option value="user" <%= locals.role === 'user' ? 'selected' : '' %>>Customer</option>
