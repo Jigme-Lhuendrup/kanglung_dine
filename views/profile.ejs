@@ -29,6 +29,7 @@
             position: relative;
             width: 200px;
             height: 200px;
+            flex-shrink: 0;
         }
 
         .profile-picture {
@@ -62,17 +63,20 @@
 
         .profile-info {
             flex: 1;
+            min-width: 0; /* Prevents flex item from overflowing */
         }
 
         .profile-name {
             font-size: 2rem;
             color: #333;
             margin: 0 0 0.5rem 0;
+            word-wrap: break-word;
         }
 
         .profile-email {
             color: #666;
             margin-bottom: 1rem;
+            word-wrap: break-word;
         }
 
         .bio-container {
@@ -84,6 +88,8 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
         }
 
         .bio-text {
@@ -94,6 +100,7 @@
             background: #f8f9fa;
             border-radius: 5px;
             min-height: 100px;
+            word-wrap: break-word;
         }
 
         .edit-bio-btn {
@@ -106,6 +113,7 @@
             gap: 0.5rem;
             padding: 0.5rem;
             font-size: 0.9rem;
+            white-space: nowrap;
         }
 
         .edit-bio-btn:hover {
@@ -121,6 +129,7 @@
             resize: vertical;
             font-family: inherit;
             margin-bottom: 1rem;
+            box-sizing: border-box;
         }
 
         .save-bio-btn {
@@ -139,6 +148,67 @@
 
         #pictureInput {
             display: none;
+        }
+
+        /* Responsive Styles */
+        @media screen and (max-width: 768px) {
+            .profile-container {
+                margin: 1rem;
+                padding: 1rem;
+            }
+
+            .profile-header {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                gap: 1rem;
+            }
+
+            .profile-picture-container {
+                width: 150px;
+                height: 150px;
+            }
+
+            .profile-info {
+                width: 100%;
+            }
+
+            .profile-name {
+                font-size: 1.5rem;
+            }
+
+            .bio-header {
+                justify-content: center;
+            }
+
+            .edit-bio-btn {
+                margin-top: 0.5rem;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .profile-container {
+                margin: 0.5rem;
+                padding: 1rem;
+            }
+
+            .profile-picture-container {
+                width: 120px;
+                height: 120px;
+            }
+
+            .profile-name {
+                font-size: 1.3rem;
+            }
+
+            .edit-picture-btn {
+                width: 35px;
+                height: 35px;
+            }
+
+            .bio-textarea {
+                min-height: 80px;
+            }
         }
     </style>
 </head>
