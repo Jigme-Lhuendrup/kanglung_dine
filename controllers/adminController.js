@@ -3,55 +3,63 @@ const { User, Restaurant, Reservation, sequelize } = require('../models'); // Im
 exports.getDashboard = async (req, res) => {
     try {
         const totalUsers = await User.count();
-        console.log('Fetched totalUsers:', totalUsers); // DEBUG
         const totalRestaurants = await Restaurant.count();
-        console.log('Fetched totalRestaurants:', totalRestaurants); // DEBUG
 
         // Find most popular restaurants by reservation count
         const popularRestaurantsRaw = await Reservation.findAll({
             attributes: [
-                'restaurantId', // Corrected casing
-                [sequelize.fn('COUNT', sequelize.col('restaurantId')), 'reservationCount'] // Corrected casing
+                'restaurantId',
+                [sequelize.fn('COUNT', sequelize.col('restaurantId')), 'reservationCount']
             ],
             include: [{
                 model: Restaurant,
                 attributes: ['name']
             }],
-            group: ['Reservation.restaurantId', 'Restaurant.id', 'Restaurant.name'], // Corrected casing
-            order: [[sequelize.fn('COUNT', sequelize.col('restaurantId')), 'DESC']], // Corrected casing
-            limit: 3 // Get top 3, adjust as needed
+            group: ['Reservation.restaurantId', 'Restaurant.id', 'Restaurant.name'],
+            order: [[sequelize.fn('COUNT', sequelize.col('restaurantId')), 'DESC']],
+            limit: 3
         });
-        console.log('Fetched popularRestaurantsRaw:', JSON.stringify(popularRestaurantsRaw, null, 2)); // DEBUG
 
         const users = await User.findAll({
             attributes: ['id', 'name', 'email', 'role', 'isVerified', 'createdAt']
         });
 
         const popularRestaurantsFormatted = popularRestaurantsRaw.map(r => ({
-            name: r.Restaurant ? r.Restaurant.name : 'Unknown Restaurant', // Handle case where Restaurant might be null
+            name: r.Restaurant ? r.Restaurant.name : 'Unknown Restaurant',
             count: r.get('reservationCount')
         }));
-        console.log('Formatted popularRestaurants:', JSON.stringify(popularRestaurantsFormatted, null, 2)); // DEBUG
 
+        // Provide the expected 'stats' and 'recentActivity' objects for the EJS view
         const viewData = {
             user: req.session.user,
             users: users,
+            stats: {
+                totalUsers: totalUsers,
+                totalOrders: 0, // Placeholder, update if you have orders
+                totalRevenue: 0.0 // Placeholder, update if you have revenue
+            },
             totalUsers,
             totalRestaurants,
             popularRestaurants: popularRestaurantsFormatted,
+            recentActivity: [], // Placeholder, update if you have recent activity
             success: req.query.success,
             error: req.query.error
         };
-        console.log('Data being sent to view:', JSON.stringify(viewData, null, 2)); // DEBUG
         res.render('admin/dashboard', viewData);
     } catch (error) {
         console.error('Error fetching data for admin dashboard:', error);
         res.render('admin/dashboard', {
             user: req.session.user,
             users: [],
+            stats: {
+                totalUsers: 0,
+                totalOrders: 0,
+                totalRevenue: 0.0
+            },
             totalUsers: 0,
             totalRestaurants: 0,
             popularRestaurants: [],
+            recentActivity: [],
             error: 'Failed to load dashboard data.'
         });
     }
@@ -73,15 +81,7 @@ exports.deleteUser = async (req, res) => {
             return res.redirect('/admin/dashboard?error=User not found.');
         }
 
-        // Optional: Add logic here if the user is an 'owner'
-        // For example, delete associated restaurants or prevent deletion if restaurants exist.
-        // For now, we'll just delete the user.
-        // if (userToDelete.role === 'owner') {
-        //     await Restaurant.destroy({ where: { ownerId: userIdToDelete } });
-        // }
-
         await userToDelete.destroy();
-        console.log(`User with ID: ${userIdToDelete} deleted by admin ID: ${adminUserId}`);
         return res.redirect('/admin/dashboard?success=User deleted successfully.');
 
     } catch (error) {
