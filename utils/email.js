@@ -12,8 +12,11 @@ const transporter = nodemailer.createTransport({
 });
 
 const sendVerificationEmail = async (to, token) => {
-  // Use BASE_URL env variable for production, fallback to localhost with PORT
-  const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
+  // Always use BASE_URL in production, fallback to localhost only in development
+  const baseUrl = process.env.NODE_ENV === 'production' 
+    ? process.env.BASE_URL 
+    : `http://localhost:${process.env.PORT || 3000}`;
+    
   const verificationUrl = `${baseUrl}/auth/verify-email/${token}`;
 
   const mailOptions = {
