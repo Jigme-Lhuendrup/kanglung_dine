@@ -12,12 +12,26 @@ const transporter = nodemailer.createTransport({
 });
 
 const sendVerificationEmail = async (to, token) => {
-  // Always use BASE_URL in production, fallback to localhost only in development
-  const baseUrl = process.env.NODE_ENV === 'production' 
-    ? process.env.BASE_URL 
-    : `http://localhost:${process.env.PORT || 3000}`;
-    
+  // Get the base URL from environment variables
+  let baseUrl = process.env.BASE_URL;
+  
+  // Log the current environment and BASE_URL for debugging
+  console.log('Current environment:', process.env.NODE_ENV);
+  console.log('BASE_URL:', baseUrl);
+
+  // Validate BASE_URL
+  if (!baseUrl) {
+    console.error('BASE_URL is not set in environment variables');
+    throw new Error('Server configuration error: BASE_URL is not set');
+  }
+
+  // Ensure BASE_URL doesn't end with a slash
+  baseUrl = baseUrl.replace(/\/$/, '');
+  
   const verificationUrl = `${baseUrl}/auth/verify-email/${token}`;
+  
+  // Log the full verification URL for debugging
+  console.log('Verification URL:', verificationUrl);
 
   const mailOptions = {
     from: process.env.SMTP_FROM,
@@ -27,6 +41,8 @@ const sendVerificationEmail = async (to, token) => {
       <p>Please verify your email address by clicking the link below:</p>
       <p><a href="${verificationUrl}">Click here to verify your email</a></p>
       <p>If you did not request this, please ignore this email.</p>
+      <p>If the link above doesn't work, copy and paste this URL into your browser:</p>
+      <p>${verificationUrl}</p>
     `,
   };
 
