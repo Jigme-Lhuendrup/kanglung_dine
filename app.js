@@ -60,6 +60,7 @@ app.use('/reservations', require('./routes/reservationRoutes'));
 app.use('/testimonials', require('./routes/testimonialRoutes'));
 app.use('/admin', require('./routes/adminRoutes'));
 app.use('/res_owner', require('./routes/ownerRoutes'));
+app.use('/res_owner', require('./routes/resOwnerRoutes'));
 
 // Static page routes
 app.get('/', (req, res) => res.render('index'));
