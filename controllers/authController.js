@@ -14,7 +14,9 @@ exports.registerUser = async (req, res) => {
     let transaction;
     
     try {
+        // Start transaction
         transaction = await sequelize.transaction();
+        console.log('Transaction started');
 
         console.log('Registration attempt with data:', {
             name: req.body.name,
@@ -24,6 +26,7 @@ exports.registerUser = async (req, res) => {
 
         const { name, email, password, role, restaurantName, restaurantAddress, restaurantPhone, restaurantHours } = req.body;
 
+        // Validate required fields
         if (!name || !email || !password || !role) {
             console.log('Missing required fields:', { name: !!name, email: !!email, password: !!password, role: !!role });
             return res.render('signup', { 
@@ -63,40 +66,28 @@ exports.registerUser = async (req, res) => {
             });
         }
 
+        // Check for existing user with detailed logging
+        console.log('Checking for existing user with email:', email);
         const existingUser = await User.findOne({ 
             where: { email },
             transaction
         });
 
         if (existingUser) {
+            console.log('Found existing user:', {
+                id: existingUser.id,
+                email: existingUser.email,
+                role: existingUser.role
+            });
             await transaction.rollback();
-            console.log('User already exists:', email);
             return res.render('signup', { 
                 error: 'Email already registered',
                 name
             });
         }
 
-        if (role === 'owner') {
-            const existingRestaurant = await Restaurant.findOne({
-                where: { name: restaurantName },
-                transaction
-            });
-
-            if (existingRestaurant) {
-                await transaction.rollback();
-                return res.render('signup', {
-                    error: 'Restaurant name already exists',
-                    name,
-                    email,
-                    role,
-                    restaurantAddress,
-                    restaurantPhone,
-                    restaurantHours
-                });
-            }
-        }
-
+        // Create new user
+        console.log('Creating new user...');
         const hashedPassword = await bcrypt.hash(password, 10);
         const verificationToken = crypto.randomBytes(32).toString('hex');
         
@@ -105,10 +96,19 @@ exports.registerUser = async (req, res) => {
             email,
             password: hashedPassword,
             role,
-            verificationToken
+            verificationToken,
+            isVerified: false
         }, { transaction });
 
+        console.log('User created successfully:', {
+            id: user.id,
+            email: user.email,
+            role: user.role
+        });
+
+        // Handle restaurant creation for owners
         if (role === 'owner') {
+            console.log('Creating restaurant for owner...');
             try {
                 const restaurant = await Restaurant.create({
                     name: restaurantName,
@@ -119,58 +119,40 @@ exports.registerUser = async (req, res) => {
                     description: `Welcome to ${restaurantName}, owned by ${name}.`
                 }, { transaction });
 
-                if (!restaurant) {
-                    throw new Error('Restaurant was not saved to database');
-                }
-            } catch (error) {
-                await transaction.rollback();
-                console.error('Error creating restaurant:', error);
-                return res.render('signup', {
-                    error: 'Error creating restaurant: ' + error.message,
-                    name,
-                    email,
-                    role,
-                    restaurantName,
-                    restaurantAddress,
-                    restaurantPhone,
-                    restaurantHours
+                console.log('Restaurant created successfully:', {
+                    id: restaurant.id,
+                    name: restaurant.name,
+                    ownerId: restaurant.ownerId
                 });
+            } catch (error) {
+                console.error('Error creating restaurant:', error);
+                await transaction.rollback();
+                throw error;
             }
         }
 
-        // ✅ Generate verification URL
-        const verificationUrl = `${process.env.BASE_URL}/auth/verify-email/${user.verificationToken}`;
-
-        // ✅ Send verification email with the full URL
+        // Send verification email
         try {
+            console.log('Sending verification email...');
             await sendVerificationEmail(user.email, user.verificationToken);
+            console.log('Verification email sent successfully');
         } catch (emailError) {
-            await transaction.rollback();
             console.error('Failed to send verification email:', emailError);
-            return res.render('signup', {
-                error: 'Error registering user: Could not send verification email. Please try again.',
-                name: req.body.name,
-                email: req.body.email,
-                role: req.body.role,
-                restaurantName: req.body.restaurantName,
-                restaurantAddress: req.body.restaurantAddress,
-                restaurantPhone: req.body.restaurantPhone,
-                restaurantHours: req.body.restaurantHours
-            });
+            await transaction.rollback();
+            throw emailError;
         }
 
+        // Commit transaction
         await transaction.commit();
-
-        console.log('User registered successfully, verification email sent:', {
-            id: user.id,
-            email: user.email,
-            role: user.role
-        });
+        console.log('Transaction committed successfully');
 
         return res.redirect('/auth/login?success=Registration successful! Please check your email to verify your account.');
     } catch (err) {
-        if (transaction) await transaction.rollback();
         console.error('Registration error:', err);
+        if (transaction) {
+            console.log('Rolling back transaction due to error');
+            await transaction.rollback();
+        }
         return res.render('signup', { 
             error: 'Error registering user: ' + err.message,
             name: req.body.name,
