@@ -1,8 +1,12 @@
 const isAdmin = (req, res, next) => {
-    if (req.session.isAdmin) {
+    if (req.session.user && req.session.user.role === 'admin') {
         next();
     } else {
-        res.redirect('/auth/login');
+        console.log('Admin auth failed:', {
+            session: req.session,
+            user: req.session.user
+        });
+        res.redirect('/auth/login?error=Admin access required');
     }
 };
 
