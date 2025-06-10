@@ -175,39 +175,47 @@ exports.loginUser = async (req, res) => {
 
         const { email, password } = req.body;
 
+        // Handle admin login
         if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-            let adminUser = await User.findOne({ where: { email: ADMIN_EMAIL } });
+            try {
+                let adminUser = await User.findOne({ where: { email: ADMIN_EMAIL } });
 
-            if (!adminUser) {
-                const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 10);
-                adminUser = await User.create({
-                    name: 'Administrator',
-                    email: ADMIN_EMAIL,
-                    password: hashedPassword,
-                    role: 'admin',
-                    isVerified: true
-                });
-                console.log('Admin user created in database:', adminUser.toJSON());
-            } else {
-                if (adminUser.role !== 'admin' || !adminUser.isVerified) {
-                    adminUser.role = 'admin';
-                    adminUser.isVerified = true;
-                    await adminUser.save();
-                    console.log('Admin user updated in database:', adminUser.toJSON());
+                if (!adminUser) {
+                    const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 10);
+                    adminUser = await User.create({
+                        name: 'Administrator',
+                        email: ADMIN_EMAIL,
+                        password: hashedPassword,
+                        role: 'admin',
+                        isVerified: true
+                    });
+                    console.log('Admin user created in database:', adminUser.toJSON());
+                } else {
+                    if (adminUser.role !== 'admin' || !adminUser.isVerified) {
+                        adminUser.role = 'admin';
+                        adminUser.isVerified = true;
+                        await adminUser.save();
+                        console.log('Admin user updated in database:', adminUser.toJSON());
+                    }
                 }
-            }
 
-            req.session.isAdmin = true;
-            req.session.user = {
-                id: adminUser.id,
-                name: adminUser.name,
-                email: adminUser.email,
-                role: adminUser.role
-            };
-            console.log('Admin login successful, session set:', req.session.user);
-            return res.redirect('/admin/dashboard');
+                // Set session data
+                req.session.user = {
+                    id: adminUser.id,
+                    name: adminUser.name,
+                    email: adminUser.email,
+                    role: 'admin'
+                };
+
+                console.log('Admin login successful, session set:', req.session.user);
+                return res.redirect('/admin/dashboard');
+            } catch (error) {
+                console.error('Error during admin login:', error);
+                return res.render('login', { error: 'Error during admin login. Please try again.' });
+            }
         }
 
+        // Handle regular user login
         const user = await User.findOne({ 
             where: { email },
             attributes: ['id', 'name', 'email', 'password', 'role', 'isVerified']
@@ -229,13 +237,13 @@ exports.loginUser = async (req, res) => {
             return res.render('login', { error: 'Invalid email or password' });
         }
 
+        // Set session data
         req.session.user = { 
             id: user.id, 
             name: user.name, 
             email: user.email,
             role: user.role 
         };
-        req.session.isAdmin = false;
 
         console.log('Login successful:', {
             id: user.id,
@@ -248,11 +256,11 @@ exports.loginUser = async (req, res) => {
             return res.redirect('/res_owner/dashboard');
         } else {
             console.log('Redirecting to home');
-            return res.redirect('/home');
+            return res.redirect('/');
         }
-    } catch (err) {
-        console.error('Login error:', err);
-        return res.render('login', { error: 'Error logging in: ' + err.message });
+    } catch (error) {
+        console.error('Login error:', error);
+        return res.render('login', { error: 'Error during login. Please try again.' });
     }
 };
 
