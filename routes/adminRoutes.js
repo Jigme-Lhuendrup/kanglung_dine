@@ -11,10 +11,10 @@ router.post('/users/delete/:id', isAdmin, adminController.deleteUser);
 
 // Admin logout
 router.get('/logout', isAdmin, (req, res) => {
-    req.session.isAdmin = false;
     req.session.destroy((err) => {
         if (err) {
             console.error('Error destroying session:', err);
+            return res.status(500).json({ error: 'Error logging out' });
         }
         res.redirect('/auth/login');
     });
