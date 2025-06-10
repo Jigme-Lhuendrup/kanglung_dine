@@ -89,6 +89,8 @@ router.get('/dashboard', isOwner, async (req, res) => {
 router.post('/add-menu-item', isOwner, async (req, res) => {
     try {
         const { itemNo, itemName, price } = req.body;
+        
+        // Get the restaurant owned by the current user
         const restaurant = await Restaurant.findOne({
             where: { ownerId: req.session.user.id }
         });
@@ -103,17 +105,78 @@ router.post('/add-menu-item', isOwner, async (req, res) => {
         }
 
         // Create new menu item
-        const menuItem = await Menu.create({
+        await Menu.create({
             itemNo: parseInt(itemNo),
             itemName,
             price: parseFloat(price),
             restaurantId: restaurant.id
         });
 
-        res.redirect('/res_owner/dashboard');
+        // Fetch updated menu items
+        const menuItems = await Menu.findAll({
+            where: { restaurantId: restaurant.id },
+            order: [['itemNo', 'ASC']],
+            attributes: ['id', 'itemNo', 'itemName', 'price']
+        });
+
+        // Fetch updated reservations
+        const reservations = await Reservation.findAll({
+            where: { restaurantId: restaurant.id },
+            include: [
+                {
+                    model: User,
+                    attributes: ['name', 'email']
+                }
+            ],
+            order: [
+                ['date', 'ASC'],
+                ['time', 'ASC']
+            ]
+        });
+
+        // Render the dashboard with updated data
+        res.render('res_owner/ownerDashboard', {
+            user: req.session.user,
+            restaurant,
+            reservations,
+            menuItems,
+            successMessage: 'Menu item added successfully!'
+        });
     } catch (error) {
         console.error('Error adding menu item:', error);
-        res.status(500).json({ error: 'Error adding menu item' });
+        
+        // Get the restaurant and current menu items for error case
+        const restaurant = await Restaurant.findOne({
+            where: { ownerId: req.session.user.id }
+        });
+        
+        const menuItems = await Menu.findAll({
+            where: { restaurantId: restaurant.id },
+            order: [['itemNo', 'ASC']],
+            attributes: ['id', 'itemNo', 'itemName', 'price']
+        });
+
+        const reservations = await Reservation.findAll({
+            where: { restaurantId: restaurant.id },
+            include: [
+                {
+                    model: User,
+                    attributes: ['name', 'email']
+                }
+            ],
+            order: [
+                ['date', 'ASC'],
+                ['time', 'ASC']
+            ]
+        });
+
+        res.render('res_owner/ownerDashboard', {
+            user: req.session.user,
+            restaurant,
+            reservations,
+            menuItems,
+            errorMessage: 'Error adding menu item: ' + error.message
+        });
     }
 });
 
