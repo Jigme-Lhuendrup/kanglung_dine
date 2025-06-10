@@ -103,17 +103,16 @@
                                         <td><%= user.email %></td>
                                         <td><%= user.role %></td>
                                         <td>
-                                            <span class="status-badge <%= user.status.toLowerCase() %>">
-                                                <%= user.status %>
+                                            <span class="status-badge <%= user.isVerified ? 'verified' : 'unverified' %>">
+                                                <%= user.isVerified ? 'Verified' : 'Unverified' %>
                                             </span>
                                         </td>
                                         <td>
-                                            <button class="btn-edit" onclick="editUser('<%= user.id %>')">
-                                                <i data-feather="edit-2"></i>
-                                            </button>
-                                            <button class="btn-delete" onclick="deleteUser('<%= user.id %>')">
-                                                <i data-feather="trash-2"></i>
-                                            </button>
+                                            <form action="/admin/users/delete/<%= user.id %>" method="POST" style="display: inline;">
+                                                <button type="submit" class="btn-delete" onclick="return confirm('Are you sure you want to delete this user?')">
+                                                    <i data-feather="trash-2"></i>
+                                                </button>
+                                            </form>
                                         </td>
                                     </tr>
                                 <% }); %>
@@ -194,19 +193,6 @@
                 }
             });
         });
-
-        // User management functions
-        function editUser(id) {
-            // Implement edit functionality
-            console.log('Edit user:', id);
-        }
-
-        function deleteUser(id) {
-            if (confirm('Are you sure you want to delete this user?')) {
-                // Implement delete functionality
-                console.log('Delete user:', id);
-            }
-        }
 
         // Search functionality
         const userSearch = document.getElementById('userSearch');
