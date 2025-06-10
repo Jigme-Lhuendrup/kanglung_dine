@@ -2,6 +2,8 @@ const { User, Restaurant, Reservation, sequelize } = require('../models'); // Im
 
 exports.getDashboard = async (req, res) => {
     try {
+        console.log('Fetching admin dashboard data...');
+        
         const totalUsers = await User.count();
         const totalRestaurants = await Restaurant.count();
 
@@ -24,27 +26,53 @@ exports.getDashboard = async (req, res) => {
             attributes: ['id', 'name', 'email', 'role', 'isVerified', 'createdAt']
         });
 
+        // Format users data to include status
+        const formattedUsers = users.map(user => ({
+            ...user.toJSON(),
+            status: user.isVerified ? 'Verified' : 'Unverified'
+        }));
+
         const popularRestaurantsFormatted = popularRestaurantsRaw.map(r => ({
             name: r.Restaurant ? r.Restaurant.name : 'Unknown Restaurant',
             count: r.get('reservationCount')
         }));
 
-        // Provide the expected 'stats' and 'recentActivity' objects for the EJS view
+        // Create recent activity data
+        const recentActivity = [
+            {
+                icon: 'users',
+                description: `${totalUsers} total users registered`,
+                time: 'Just now'
+            },
+            {
+                icon: 'shopping-bag',
+                description: `${totalRestaurants} restaurants registered`,
+                time: 'Just now'
+            }
+        ];
+
         const viewData = {
             user: req.session.user,
-            users: users,
+            users: formattedUsers,
             stats: {
                 totalUsers: totalUsers,
-                totalOrders: 0, // Placeholder, update if you have orders
-                totalRevenue: 0.0 // Placeholder, update if you have revenue
+                totalOrders: 0,
+                totalRevenue: 0.0
             },
             totalUsers,
             totalRestaurants,
             popularRestaurants: popularRestaurantsFormatted,
-            recentActivity: [], // Placeholder, update if you have recent activity
+            recentActivity,
             success: req.query.success,
             error: req.query.error
         };
+
+        console.log('Rendering admin dashboard with data:', {
+            totalUsers,
+            totalRestaurants,
+            userCount: formattedUsers.length
+        });
+
         res.render('admin/dashboard', viewData);
     } catch (error) {
         console.error('Error fetching data for admin dashboard:', error);
