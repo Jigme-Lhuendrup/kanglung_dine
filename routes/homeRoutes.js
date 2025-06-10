@@ -21,7 +21,7 @@ router.get('/restaurants', async (req, res) => {
             include: [
                 {
                     model: Menu,
-                    attributes: ['id']
+                    attributes: ['id', 'itemNo', 'itemName', 'price']
                 },
                 {
                     model: User,
