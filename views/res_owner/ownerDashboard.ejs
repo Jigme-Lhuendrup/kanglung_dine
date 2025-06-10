@@ -110,6 +110,16 @@
       <div class="page" id="menu">
         <h2>Menu Management</h2>
         <div class="menu-content">
+          <% if (typeof successMessage !== 'undefined' && successMessage) { %>
+            <div class="alert alert-success">
+              <%= successMessage %>
+            </div>
+          <% } %>
+          <% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
+            <div class="alert alert-error">
+              <%= errorMessage %>
+            </div>
+          <% } %>
           <!-- Add Menu Item Form -->
           <div class="card">
             <div class="card-header">
@@ -144,33 +154,37 @@
               <h3>Current Menu Items</h3>
             </div>
             <div class="card-body">
-              <table class="menu-table">
-                <thead>
-                  <tr>
-                    <th>Item No.</th>
-                    <th>Name</th>
-                    <th>Price</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% menuItems.forEach(item => { %>
+              <% if (menuItems && menuItems.length > 0) { %>
+                <table class="menu-table">
+                  <thead>
                     <tr>
-                      <td><%= item.itemNo %></td>
-                      <td><%= item.itemName %></td>
-                      <td>Nu. <%= item.price.toFixed(2) %></td>
-                      <td>
-                        <button class="btn-edit" onclick="editMenuItem('<%= item.id %>')">
-                          <i data-feather="edit-2"></i>
-                        </button>
-                        <button class="btn-delete" onclick="deleteMenuItem('<%= item.id %>')">
-                          <i data-feather="trash-2"></i>
-                        </button>
-                      </td>
+                      <th>Item No.</th>
+                      <th>Name</th>
+                      <th>Price</th>
+                      <th>Actions</th>
                     </tr>
-                  <% }); %>
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    <% menuItems.forEach(item => { %>
+                      <tr>
+                        <td><%= item.itemNo %></td>
+                        <td><%= item.itemName %></td>
+                        <td>Nu. <%= Number(item.price).toFixed(2) %></td>
+                        <td>
+                          <button class="btn-edit" onclick="editMenuItem('<%= item.id %>')">
+                            <i data-feather="edit-2"></i>
+                          </button>
+                          <button class="btn-delete" onclick="deleteMenuItem('<%= item.id %>')">
+                            <i data-feather="trash-2"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    <% }); %>
+                  </tbody>
+                </table>
+              <% } else { %>
+                <p class="no-items">No menu items available. Add your first menu item above.</p>
+              <% } %>
             </div>
           </div>
         </div>
@@ -418,6 +432,32 @@
 
     .mt-4 {
       margin-top: 1.5rem;
+    }
+
+    .alert {
+      padding: 15px;
+      margin-bottom: 20px;
+      border: 1px solid transparent;
+      border-radius: 4px;
+    }
+    
+    .alert-success {
+      color: #155724;
+      background-color: #d4edda;
+      border-color: #c3e6cb;
+    }
+    
+    .alert-error {
+      color: #721c24;
+      background-color: #f8d7da;
+      border-color: #f5c6cb;
+    }
+
+    .no-items {
+      text-align: center;
+      color: #666;
+      padding: 20px;
+      font-style: italic;
     }
   </style>
 
