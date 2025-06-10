@@ -27,6 +27,8 @@ router.get('/', async (req, res) => {
 // Route to view all reservations
 router.get('/view-reservations', async (req, res) => {
     try {
+        console.log('Session user:', req.session.user); // Debug log
+
         // If user is an owner, redirect to owner dashboard
         if (req.session.user.role === 'owner') {
             return res.redirect('/res_owner/dashboard');
@@ -53,6 +55,9 @@ router.get('/view-reservations', async (req, res) => {
                 ['time', 'DESC']
             ]
         });
+
+        console.log('Found reservations:', reservations.length); // Debug log
+        console.log('First reservation:', reservations[0]); // Debug log
 
         res.render('view-reservations', { 
             reservations,
