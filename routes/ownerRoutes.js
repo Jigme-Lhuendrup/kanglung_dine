@@ -86,7 +86,7 @@ router.get('/dashboard', isOwner, async (req, res) => {
 
 // Menu Management Routes
 // Add a new menu item
-router.post('/menu', isOwner, async (req, res) => {
+router.post('/add-menu-item', isOwner, async (req, res) => {
     try {
         const { itemNo, itemName, price } = req.body;
         const restaurant = await Restaurant.findOne({
@@ -104,13 +104,13 @@ router.post('/menu', isOwner, async (req, res) => {
 
         // Create new menu item
         const menuItem = await Menu.create({
-            itemNo,
+            itemNo: parseInt(itemNo),
             itemName,
-            price,
+            price: parseFloat(price),
             restaurantId: restaurant.id
         });
 
-        res.status(201).json(menuItem);
+        res.redirect('/res_owner/dashboard');
     } catch (error) {
         console.error('Error adding menu item:', error);
         res.status(500).json({ error: 'Error adding menu item' });
