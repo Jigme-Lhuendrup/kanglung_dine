@@ -29,39 +29,67 @@ router.get('/view-reservations', async (req, res) => {
     try {
         console.log('Session user:', req.session.user); // Debug log
 
-        // If user is an owner, redirect to owner dashboard
-        if (req.session.user.role === 'owner') {
-            return res.redirect('/res_owner/dashboard');
-        }
+        let reservations;
+        let isOwner = false;
 
-        // For regular users, show their own reservations
-        const reservations = await Reservation.findAll({
-            where: {
-                userId: req.session.user.id
-            },
-            include: [
-                {
-                    model: Restaurant,
-                    attributes: ['name', 'address', 'phone'],
-                    include: [{
-                        model: User,
-                        attributes: ['name'],
-                        as: 'User'
-                    }]
-                }
-            ],
-            order: [
-                ['date', 'DESC'],
-                ['time', 'DESC']
-            ]
-        });
+        if (req.session.user.role === 'owner') {
+            // For owners, show reservations for their restaurant
+            const restaurant = await Restaurant.findOne({
+                where: { ownerId: req.session.user.id }
+            });
+
+            if (restaurant) {
+                reservations = await Reservation.findAll({
+                    where: {
+                        restaurantId: restaurant.id
+                    },
+                    include: [
+                        {
+                            model: User,
+                            attributes: ['name', 'email']
+                        },
+                        {
+                            model: Restaurant,
+                            attributes: ['name', 'address', 'phone']
+                        }
+                    ],
+                    order: [
+                        ['date', 'DESC'],
+                        ['time', 'DESC']
+                    ]
+                });
+                isOwner = true;
+            }
+        } else {
+            // For regular users, show their own reservations
+            reservations = await Reservation.findAll({
+                where: {
+                    userId: req.session.user.id
+                },
+                include: [
+                    {
+                        model: Restaurant,
+                        attributes: ['name', 'address', 'phone'],
+                        include: [{
+                            model: User,
+                            attributes: ['name'],
+                            as: 'User'
+                        }]
+                    }
+                ],
+                order: [
+                    ['date', 'DESC'],
+                    ['time', 'DESC']
+                ]
+            });
+        }
 
         console.log('Found reservations:', reservations.length); // Debug log
         console.log('First reservation:', reservations[0]); // Debug log
 
         res.render('view-reservations', { 
             reservations,
-            isOwner: false
+            isOwner
         });
     } catch (err) {
         console.error('Error fetching reservations:', err.message);
